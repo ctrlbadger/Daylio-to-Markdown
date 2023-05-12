@@ -1,0 +1,110 @@
+---
+title: "Daylio Analysis"
+author: "Thomas Broadbent"
+format: 
+  html:
+    code-overflow: wrap
+editor: visual
+
+knitr:
+  opts_chunk: 
+    collapse: false
+    comment: "#>" 
+    R.options:
+      knitr.graphics.auto_pdf: true
+---
+
+## Daylio Data Wrangling
+
+```{r, warning=FALSE, message=FALSE}
+#| code-fold: true
+#| code-summary: "Libraries Used"
+
+# Useful Libraries
+library(tidyverse)
+library(clock)
+library(stringr)
+library(purrr)
+library(glue)
+```
+
+Daylio was my initial diary app that I used for quite a while last year, I've since stopped using it but I've still been pretty interested in what I can learn from it. In this short document I'll go through the 450 observations over about a 2 year period and see what I can gather.
+
+First to obtain the data, I went into Daylio and exported a backup as a CSV file.
+
+```{r}
+daylio_export_2023_05_12 <- read.csv("C:/Users/ctrlb/Github/Daylio-to-Markdown/daylio_export_2023_05_12.csv")
+
+daylio <- daylio_export_2023_05_12 %>%
+  mutate(
+    date_time = date_time_parse(paste(full_date, time), zone="GMT", format = "%Y-%m-%d %H:%M"),
+    weekday = as.factor(weekday),
+    mood = as.factor(mood),
+    activ_str = activities,
+    note_title = note_title,
+    note = note)
+
+```
+
+## Create Activity Table
+
+In order to create a table of activities from each day, notice that the activities column comes in the following form `Sleeping | Exercise | Reading`, to create a data frame out of this we first split the string into a character vectors for each day. We use the regex pattern `\s|\s` to split up the string. To get a vector of all activities we use the `union` function.
+
+```{r}
+# Get each day of activities as a character vector
+activ_list <- map(daylio$activ_str, ~ str_split_1(.x, pattern=regex("\\s\\|\\s")))
+
+# Find all activities
+activ_all <- reduce(activ_list, union)
+activ_all[activ_all == ""] <- "unknown"
+
+num_activs <- length(activ_all)
+
+activ_all_list <- map(activ_list, ~ activ_all %in% .x) %>%
+  map(set_names, activ_all)
+
+activ_tibble <- bind_rows(activ_all_list)
+
+
+```
+
+## Creating Markdown Files
+
+To create tags for each mood or activity, a bit of regex is used. After that using the glue package I form a document string for each entry.
+
+```{r}
+activ_str_tags <- map_chr(activ_list, 
+                       ~ str_replace_all(.x, pattern = regex("\\s"), "-") %>%
+                         str_replace_all(pattern = regex("^"), "#") %>%
+                         str_flatten(collapse = " "))
+
+daylio$activ_str_tags <- activ_str_tags
+
+daylio <- daylio %>% mutate(
+  document=glue(
+    "Created: {date_time}",
+    "Mood: #{mood}",
+    "Tags: {activ_str_tags}",
+    "Note:",
+    "{note}",
+    .sep = '\n'),
+  date_file_formatted = date_format(date_time, format="%d-%m-%Y %H-%M"),
+  filename = glue(
+    "Daylio/Daylio {date_file_formatted}.md"
+  )
+)
+```
+
+Using the `cat` function all the daylio files are saved in markdown format.
+
+```{r, eval=FALSE}
+folder <- "Daylio"
+if (file.exists(folder)) {
+  stop("The Daylio folder already exists.")
+} else {
+  dir.create(folder)
+}
+
+walk2(daylio$filename, daylio$document, ~
+       cat(.y, file=.x))
+```
