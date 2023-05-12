@@ -4,6 +4,9 @@ author: "Thomas Broadbent"
 format: 
   html:
     code-overflow: wrap
+  pdf: 
+    toc: false
+    code-overflow: wrap
 editor: visual
 
 knitr:
@@ -13,6 +16,12 @@ knitr:
     R.options:
       knitr.graphics.auto_pdf: true
 ---
+
+```{r, setup, include=FALSE}
+knitr::opts_chunk$set(
+  results = "hold", tidy=TRUE, tidy.opts=list(width.cutoff=60) 
+)
+```
 
 ## Daylio Data Wrangling
 
@@ -33,7 +42,7 @@ Daylio was my initial diary app that I used for quite a while last year, I've si
 First to obtain the data, I went into Daylio and exported a backup as a CSV file.
 
 ```{r}
-daylio_export_2023_05_12 <- read.csv("C:/Users/ctrlb/Github/Daylio-to-Markdown/daylio_export_2023_05_12.csv")
+daylio_export_2023_05_12 <- read.csv("daylio_export_2023_05_12.csv")
 
 daylio <- daylio_export_2023_05_12 %>%
   mutate(

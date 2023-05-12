@@ -146,16 +146,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>Daylio was my initial diary app that I used for quite a while last year, I’ve since stopped using it but I’ve still been pretty interested in what I can learn from it. In this short document I’ll go through the 450 observations over about a 2 year period and see what I can gather.</p>
 <p>First to obtain the data, I went into Daylio and exported a backup as a CSV file.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>daylio_export_2023_05_12 <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"C:/Users/ctrlb/Github/Daylio-to-Markdown/daylio_export_2023_05_12.csv"</span>)</span>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>daylio_export_2023_05_12 <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"daylio_export_2023_05_12.csv"</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>daylio <span class="ot">&lt;-</span> daylio_export_2023_05_12 <span class="sc">%&gt;%</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">date_time =</span> <span class="fu">date_time_parse</span>(<span class="fu">paste</span>(full_date, time), <span class="at">zone=</span><span class="st">"GMT"</span>, <span class="at">format =</span> <span class="st">"%Y-%m-%d %H:%M"</span>),</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">weekday =</span> <span class="fu">as.factor</span>(weekday),</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">mood =</span> <span class="fu">as.factor</span>(mood),</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">activ_str =</span> activities,</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">note_title =</span> note_title,</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">note =</span> note)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">date_time =</span> <span class="fu">date_time_parse</span>(<span class="fu">paste</span>(full_date, time),</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        <span class="at">zone =</span> <span class="st">"GMT"</span>, <span class="at">format =</span> <span class="st">"%Y-%m-%d %H:%M"</span>), <span class="at">weekday =</span> <span class="fu">as.factor</span>(weekday),</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        <span class="at">mood =</span> <span class="fu">as.factor</span>(mood), <span class="at">activ_str =</span> activities, <span class="at">note_title =</span> note_title,</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        <span class="at">note =</span> note)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="create-activity-table" class="level2">
@@ -163,7 +160,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>In order to create a table of activities from each day, notice that the activities column comes in the following form <code>Sleeping | Exercise | Reading</code>, to create a data frame out of this we first split the string into a character vectors for each day. We use the regex pattern <code>\s|\s</code> to split up the string. To get a vector of all activities we use the <code>union</code> function.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get each day of activities as a character vector</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>activ_list <span class="ot">&lt;-</span> <span class="fu">map</span>(daylio<span class="sc">$</span>activ_str, <span class="sc">~</span> <span class="fu">str_split_1</span>(.x, <span class="at">pattern=</span><span class="fu">regex</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">s</span><span class="sc">\\</span><span class="st">|</span><span class="sc">\\</span><span class="st">s"</span>)))</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>activ_list <span class="ot">&lt;-</span> <span class="fu">map</span>(daylio<span class="sc">$</span>activ_str, <span class="sc">~</span><span class="fu">str_split_1</span>(.x, <span class="at">pattern =</span> <span class="fu">regex</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">s</span><span class="sc">\\</span><span class="st">|</span><span class="sc">\\</span><span class="st">s"</span>)))</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Find all activities</span></span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>activ_all <span class="ot">&lt;-</span> <span class="fu">reduce</span>(activ_list, union)</span>
@@ -171,8 +168,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>num_activs <span class="ot">&lt;-</span> <span class="fu">length</span>(activ_all)</span>
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>activ_all_list <span class="ot">&lt;-</span> <span class="fu">map</span>(activ_list, <span class="sc">~</span> activ_all <span class="sc">%in%</span> .x) <span class="sc">%&gt;%</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(set_names, activ_all)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>activ_all_list <span class="ot">&lt;-</span> <span class="fu">map</span>(activ_list, <span class="sc">~</span>activ_all <span class="sc">%in%</span> .x) <span class="sc">%&gt;%</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">map</span>(set_names, activ_all)</span>
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>activ_tibble <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(activ_all_list)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -181,37 +178,29 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h2 class="anchored" data-anchor-id="creating-markdown-files">Creating Markdown Files</h2>
 <p>To create tags for each mood or activity, a bit of regex is used. After that using the glue package I form a document string for each entry.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>activ_str_tags <span class="ot">&lt;-</span> <span class="fu">map_chr</span>(activ_list, </span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>                       <span class="sc">~</span> <span class="fu">str_replace_all</span>(.x, <span class="at">pattern =</span> <span class="fu">regex</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">s"</span>), <span class="st">"-"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>                         <span class="fu">str_replace_all</span>(<span class="at">pattern =</span> <span class="fu">regex</span>(<span class="st">"^"</span>), <span class="st">"#"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>                         <span class="fu">str_flatten</span>(<span class="at">collapse =</span> <span class="st">" "</span>))</span>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>activ_str_tags <span class="ot">&lt;-</span> <span class="fu">map_chr</span>(activ_list, <span class="sc">~</span><span class="fu">str_replace_all</span>(.x, <span class="at">pattern =</span> <span class="fu">regex</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">s"</span>),</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"-"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">str_replace_all</span>(<span class="at">pattern =</span> <span class="fu">regex</span>(<span class="st">"^"</span>), <span class="st">"#"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">str_flatten</span>(<span class="at">collapse =</span> <span class="st">" "</span>))</span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>daylio<span class="sc">$</span>activ_str_tags <span class="ot">&lt;-</span> activ_str_tags</span>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>daylio <span class="ot">&lt;-</span> daylio <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">document=</span><span class="fu">glue</span>(</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Created: {date_time}"</span>,</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Mood: #{mood}"</span>,</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Tags: {activ_str_tags}"</span>,</span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Note:"</span>,</span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">"{note}"</span>,</span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">.sep =</span> <span class="st">'</span><span class="sc">\n</span><span class="st">'</span>),</span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">date_file_formatted =</span> <span class="fu">date_format</span>(date_time, <span class="at">format=</span><span class="st">"%d-%m-%Y %H-%M"</span>),</span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">filename =</span> <span class="fu">glue</span>(</span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Daylio/Daylio {date_file_formatted}.md"</span></span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>daylio <span class="ot">&lt;-</span> daylio <span class="sc">%&gt;%</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">document =</span> <span class="fu">glue</span>(<span class="st">"Created: {date_time}"</span>, <span class="st">"Mood: #{mood}"</span>,</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Tags: {activ_str_tags}"</span>, <span class="st">"Note:"</span>, <span class="st">"{note}"</span>, <span class="at">.sep =</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>),</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">date_file_formatted =</span> <span class="fu">date_format</span>(date_time, <span class="at">format =</span> <span class="st">"%d-%m-%Y %H-%M"</span>),</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        <span class="at">filename =</span> <span class="fu">glue</span>(<span class="st">"Daylio/Daylio {date_file_formatted}.md"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>Using the <code>cat</code> function all the daylio files are saved in markdown format.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>folder <span class="ot">&lt;-</span> <span class="st">"Daylio"</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">file.exists</span>(folder)) {</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stop</span>(<span class="st">"The Daylio folder already exists."</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stop</span>(<span class="st">"The Daylio folder already exists."</span>)</span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dir.create</span>(folder)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">dir.create</span>(folder)</span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="fu">walk2</span>(daylio<span class="sc">$</span>filename, daylio<span class="sc">$</span>document, <span class="sc">~</span></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>       <span class="fu">cat</span>(.y, <span class="at">file=</span>.x))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="fu">walk2</span>(daylio<span class="sc">$</span>filename, daylio<span class="sc">$</span>document, <span class="sc">~</span><span class="fu">cat</span>(.y, <span class="at">file =</span> .x))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 
